@@ -2,12 +2,14 @@ from kivy.app import App
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.textinput import TextInput
+from kivy.core.window import Window
 
 
 class MainApp(App):
     def build(self):
-        main_layout = BoxLayout(orientation="vertical", padding=10, spacing=10)
-        self.solution = TextInput(multiline=False, readonly=False, halign="right", font_size=55)
+        main_layout = BoxLayout(orientation="vertical", padding=3, spacing=3)
+        self.solution = TextInput(multiline=False, readonly=False, halign="right", font_size=40)
+        self.solution.bind(text=self.on_key)
         main_layout.add_widget(self.solution)
         buttons = [
             ["7", "8", "9", "/"],
@@ -26,15 +28,40 @@ class MainApp(App):
         equals_button = Button(text="=", pos_hint={"center_x": 0.5, "center_y": 0.5})
         equals_button.bind(on_press=self.on_solution)
         main_layout.add_widget(equals_button)
-
-        # return a Button() as a root widget
+        Window.size = (500, 650)
         return main_layout
+
+    def on_key(self, instance, value):
+        print(len(value))
+        if len(value) <= 1 and value.isdigit() == False:
+            value = value[0:len(value) - 1]
+        elif len(value) <= 1 and value.isdigit() == True:
+            self.solution.text = value
+        elif value[len(value) - 1].isdigit() or value[len(value) - 1] == "+" \
+                or value[len(value) - 1] == "-" or value[len(value) - 1] == "/" \
+                or value[len(value) - 1] == "*":
+            if len(value) == 1:
+                if not value.isdigit():
+                    value = value[0:len(value) - 1]
+            elif len(value) > 1 and value[len(value) - 1].isdigit() == False \
+                    and value[len(value) - 2].isdigit() == False:
+                value = value[0:len(value) - 1]
+        else:
+            value = value[0:len(value) - 1]
+        self.solution.text = value
 
     def on_button_press(self, instance):
         if instance.text == "C":
             self.solution.text = ""
         else:
-            self.solution.text += instance.text
+            if len(self.solution.text) == 0:
+                if instance.text.isdigit():
+                    self.solution.text += instance.text
+            elif len(self.solution.text) > 0 and self.solution.text[len(self.solution.text) - 1].isdigit() == False and \
+                    instance.text.isdigit() == False:
+                self.solution.text += ""
+            else:
+                self.solution.text += instance.text
 
     def on_solution(self, instance):
         if self.solution.text:
