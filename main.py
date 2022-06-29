@@ -9,6 +9,7 @@ class MainApp(App):
     def build(self):
         main_layout = BoxLayout(orientation="vertical", padding=3, spacing=3)
         self.solution = TextInput(multiline=False, readonly=False, halign="right", font_size=40)
+        self.solution.focus = True
         self.solution.bind(text=self.on_key)
         main_layout.add_widget(self.solution)
         buttons = [
@@ -32,10 +33,11 @@ class MainApp(App):
         return main_layout
 
     def on_key(self, instance, value):
-        print(len(value))
-        if len(value) <= 1 and value.isdigit() == False:
+        if len(value) <= 1 and not value.isdigit() and value != "-":
             value = value[0:len(value) - 1]
-        elif len(value) <= 1 and value.isdigit() == True:
+        elif len(value) <= 1 and value.isdigit():
+            self.solution.text = value
+        elif len(value) <= 1 and value == "-":
             self.solution.text = value
         elif value[len(value) - 1].isdigit() or value[len(value) - 1] == "+" \
                 or value[len(value) - 1] == "-" or value[len(value) - 1] == "/" \
@@ -43,9 +45,16 @@ class MainApp(App):
             if len(value) == 1:
                 if not value.isdigit():
                     value = value[0:len(value) - 1]
-            elif len(value) > 1 and value[len(value) - 1].isdigit() == False \
-                    and value[len(value) - 2].isdigit() == False:
+            elif len(value) > 1 and not value[len(value) - 1].isdigit() \
+                    and not value[len(value) - 2].isdigit() and (not value[len(value) - 3].isdigit() or
+                                                                 value[len(value) - 1] != "-"):
                 value = value[0:len(value) - 1]
+        elif value[len(value) - 1] == "=":
+            value = value[0:len(value) - 1]
+            try:
+                value = str(eval(value))
+            except ArithmeticError:
+                value = "Error"
         else:
             value = value[0:len(value) - 1]
         self.solution.text = value
@@ -55,10 +64,10 @@ class MainApp(App):
             self.solution.text = ""
         else:
             if len(self.solution.text) == 0:
-                if instance.text.isdigit():
+                if instance.text.isdigit() or instance.text == "-":
                     self.solution.text += instance.text
-            elif len(self.solution.text) > 0 and self.solution.text[len(self.solution.text) - 1].isdigit() == False and \
-                    instance.text.isdigit() == False:
+            elif len(self.solution.text) > 0 and not self.solution.text[len(self.solution.text) - 1].isdigit() \
+                    and not instance.text.isdigit() and instance.text != "-":
                 self.solution.text += ""
             else:
                 self.solution.text += instance.text
@@ -67,7 +76,7 @@ class MainApp(App):
         if self.solution.text:
             try:
                 self.solution.text = str(eval(self.solution.text))
-            except:
+            except ArithmeticError:
                 self.solution.text = "Error"
 
 
