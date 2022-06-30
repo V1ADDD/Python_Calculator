@@ -6,79 +6,67 @@ from kivy.core.window import Window
 
 
 class MainApp(App):
-    def build(self):
-        main_layout = BoxLayout(orientation="vertical", padding=3, spacing=3)
-        self.solution = TextInput(multiline=False, readonly=False, halign="right", font_size=40)
-        self.solution.focus = True
-        self.solution.bind(text=self.on_key)
-        main_layout.add_widget(self.solution)
+    def build(self):  # constructor
+        main_layout = BoxLayout(orientation="vertical", padding=3, spacing=3)  # window
+        self.solution = TextInput(multiline=False, readonly=False, halign="right", font_size=40)  # obj for text input
+        self.solution.focus = True  # focused on TextInput
+        self.solution.bind(text=self.on_key)  # bind on text input for TextInput
+        main_layout.add_widget(self.solution)  # add TextInput to main window
         buttons = [
             ["7", "8", "9", "/"],
             ["4", "5", "6", "*"],
             ["1", "2", "3", "-"],
             [".", "0", "C", "+"]
-        ]
+        ]  # mass of button info's
         for row in buttons:
-            h_layout = BoxLayout()
+            h_layout = BoxLayout()  # window in window
             for label in row:
-                button = Button(text=label, pos_hint={"center_x": 0.5, "center_y": 0.5})
-                button.bind(on_press=self.on_button_press)
-                h_layout.add_widget(button)
-            main_layout.add_widget(h_layout)
+                button = Button(text=label, pos_hint={"center_x": 0.5, "center_y": 0.5})  # obj for clicking (button)
+                button.bind(on_press=self.on_button_press)  # bind on press for Button
+                h_layout.add_widget(button)  # add Button on window in window
+            main_layout.add_widget(h_layout)  # add window on window to window
 
-        equals_button = Button(text="=", pos_hint={"center_x": 0.5, "center_y": 0.5})
-        equals_button.bind(on_press=self.on_solution)
-        main_layout.add_widget(equals_button)
-        Window.size = (500, 650)
+        equals_button = Button(text="=", pos_hint={"center_x": 0.5, "center_y": 0.5})  # equal button
+        equals_button.bind(on_press=self.on_solution)  # bind on press for Equal Button
+        main_layout.add_widget(equals_button)  # add Equal Button to window
+        Window.size = (500, 650)  # size for window
         return main_layout
 
-    def on_key(self, instance, value):
-        if len(value) <= 1 and not value.isdigit() and value != "-":
+    def on_key(self, instance, value):  # bind on text input
+        if len(value) <= 1 and not value.isdigit() and value != "-":  # first entered symbol is not num or "-"
             value = value[0:len(value) - 1]
-        elif len(value) <= 1 and value.isdigit():
-            self.solution.text = value
-        elif len(value) <= 1 and value == "-":
+        elif len(value) <= 1 and (value.isdigit() or value == "-"):  # first entered symbol is num or "-"
             self.solution.text = value
         elif value[len(value) - 1].isdigit() or value[len(value) - 1] == "+" \
-                or value[len(value) - 1] == "-" or value[len(value) - 1] == "/" \
-                or value[len(value) - 1] == "*":
-            if len(value) == 1:
-                if not value.isdigit():
-                    value = value[0:len(value) - 1]
-            elif len(value) > 1 and not value[len(value) - 1].isdigit() \
+                or value[len(value) - 1] == "-" or value[len(value) - 1] == "/" or value[len(value) - 1] == "*" \
+                or value[len(value) - 1] == ".":  # entered symbol is digit or some of math symbols
+            if len(value) > 1 and not value[len(value) - 1].isdigit() \
                     and not value[len(value) - 2].isdigit() and (not value[len(value) - 3].isdigit() or
                                                                  value[len(value) - 1] != "-"):
-                value = value[0:len(value) - 1]
-        elif value[len(value) - 1] == "=":
+                value = value[0:len(value) - 1]  # for kinda "2*-1" enters check
+        elif value[len(value) - 1] == "=":  # equals
             value = value[0:len(value) - 1]
             try:
                 value = str(eval(value))
-            except ArithmeticError:
+            except:
                 value = "Error"
         else:
             value = value[0:len(value) - 1]
-        self.solution.text = value
+        self.solution.text = value  # value to TextInput
 
-    def on_button_press(self, instance):
-        if instance.text == "C":
-            self.solution.text = ""
-        else:
-            if len(self.solution.text) == 0:
-                if instance.text.isdigit() or instance.text == "-":
-                    self.solution.text += instance.text
-            elif len(self.solution.text) > 0 and not self.solution.text[len(self.solution.text) - 1].isdigit() \
-                    and not instance.text.isdigit() and instance.text != "-":
-                self.solution.text += ""
-            else:
-                self.solution.text += instance.text
+    def on_button_press(self, instance):  # bind for buttons
+        if instance.text == "C":  # C-button
+            self.solution.text = ""  # clear all
+        else:  # other buttons (exceptions bind in on_key())
+            self.solution.text += instance.text
 
-    def on_solution(self, instance):
-        if self.solution.text:
+    def on_solution(self, instance):  # bind for equal button
+        if self.solution.text:  # equals
             try:
                 self.solution.text = str(eval(self.solution.text))
-            except ArithmeticError:
+            except:
                 self.solution.text = "Error"
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # main window run
     MainApp().run()
